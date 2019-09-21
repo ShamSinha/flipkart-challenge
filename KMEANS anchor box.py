@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on Sun Feb 10 14:29:55 2019
 
@@ -6,12 +5,14 @@ Created on Sun Feb 10 14:29:55 2019
 """
 
 import numpy as np
+import matplotlib.pyplot as plt
+
 filename = "kmeans_data.csv"
 
 data = np.loadtxt(filename, delimiter=",", skiprows=1, usecols =[0,1])
 
-CLUSTERS = 4
-
+CLUSTERS = [2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , 10, 11 , 12 ,13 ,14,15] 
+Accuracy = []
 def avg_iou(boxes, clusters):
     """
     Calculates the average Intersection over Union (IoU) between a numpy array of boxes and k clusters.
@@ -28,11 +29,11 @@ def iou(box, clusters):
     :param clusters: numpy array of shape (k, 2) where k is the number of clusters
     :return: numpy array of shape (k, 0) where k is the number of clusters
     """
+    
+    
     x = np.minimum(clusters[:, 0], box[0])
     y = np.minimum(clusters[:, 1], box[1])
-    """if np.count_nonzero(x == 0) > 0 or np.count_nonzero(y == 0) > 0:
-        raise ValueError("Box has no area")
-        """
+
 
     intersection = x * y
     box_area = box[0] * box[1]
@@ -76,10 +77,17 @@ def kmeans(boxes, k, dist=np.median):
 
     return clusters
 
+for i in range(len(CLUSTERS)):
+    out = kmeans(data, k= CLUSTERS[i])
+    print("Accuracy: {:.2f}%".format(avg_iou(data, out) * 100))
+    print("Boxes:\n {}".format(out))
+    Accuracy.append(avg_iou(data, out) * 100)
+    ratios = np.around(out[:, 0] / out[:, 1], decimals=2).tolist()
+    print("Ratios:\n {}".format(sorted(ratios)))
+    
+plt.plot(CLUSTERS , Accuracy)
 
-out = kmeans(data, k=CLUSTERS)
-print("Accuracy: {:.2f}%".format(avg_iou(data, out) * 100))
-print("Boxes:\n {}".format(out))
-
-ratios = np.around(out[:, 0] / out[:, 1], decimals=2).tolist()
-print("Ratios:\n {}".format(sorted(ratios)))
+plt.xlabel("No. of Clusters")
+plt.ylabel("Accuracy")
+plt.title("Result")
+plt.show()
